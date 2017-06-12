@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        body {
+            display: block;
+            margin: 0px;
+            padding: 20px;
+            overflow: hidden;
+            background-color: #000;
+        }
+    </style>
+    <script src="d3.min.js"></script>
+</head>
+<body>
+<div id="container"></div>
+<script type="text/javascript">
+
+    var height = window.innerHeight;
+    var width = window.innerWidth;
+    var svg = d3.select('#container').append('svg');
+
+    d3.json("world.json", function (data) {
+
+        var projection = d3.geo.conicEqualArea();
+        var oldScala = projection.scale();
+        var oldTranslate = projection.translate();
+
+        var xy = projection.scale(oldScala * (width / oldTranslate[0] / 2) * 0.9)
+                .translate([width / 2, height / 2]);
+
+        var path = d3.geo.path().projection(xy);
+
+        //创建一个经纬度网格生成器，设置经度和纬度范围以及步长
+        var graticule = d3.geo.graticule()
+                .step([30, 30]);
+        var grid = graticule();
+
+        svg.attr('width', width).attr('height', height);
+
+        svg.append('path')
+                .datum(grid)
+                .attr('class', 'graticule')
+                .style('stroke', 'rgba(200, 200, 200, 0.3)')
+                .style('stroke-width', '0.5')
+                .attr('d', path);
+
+        svg.selectAll('path').data(data.features).enter().append('svg:path')
+                .attr('d', path)
+                .attr('fill', 'rgba(17, 17, 17, 0.61)')
+                .attr('stroke', 'rgba(200, 200, 200, 0.7)')
+                .attr('stroke-width', 1)
+                .on('mouseover', function (data) {
+                    d3.select(this).attr('fill', 'rgba(100, 100, 100, 0.61)');
+                })
+                .on('mouseout', function (data) {
+                    d3.select(this).attr('fill', 'rgba(17, 17, 17, 0.61)');
+                });
+    });
+
+    //    rgba(37, 140, 249, 0.8)
+    //    rgba(14, 241, 242, 0.8)
+    //    rgba(255, 255, 255, 0.8)
+    var a = d3.rgb(37, 140, 249);	//红色
+    var b = d3.rgb(14, 241, 242);	//绿色
+    var c = d3.rgb(255, 255, 255);	//绿色
+
+    //定义一个线性渐变
+    var defs = svg.append("defs");
+
+    var linearGradient = defs.append("linearGradient")
+            .attr("id", "linearColor")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "0%");
+
+    var stop1 = linearGradient.append("stop")
+            .attr("offset", "0%")
+            .style("stop-color", a.toString());
+
+    var stop2 = linearGradient.append("stop")
+            .attr("offset", "50%")
+            .style("stop-color", b.toString());
+
+    var stop3 = linearGradient.append("stop")
+            .attr("offset", "100%")
+            .style("stop-color", c.toString());
+
+    //添加一个矩形，并应用线性渐变
+    var colorRect = svg.append("rect")
+            .attr("x", 15)
+            .attr("y", 450)
+            .attr("width", 200)
+            .attr("height", 30)
+            .style("fill", "url(#" + linearGradient.attr("id") + ")");
+</script>
+</body>
+</html>
