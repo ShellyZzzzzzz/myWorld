@@ -21,7 +21,7 @@
     var svg = d3.select('#container').append('svg');
     var projection = d3.geo.conicEqualArea();
 
-    d3.json("world.json", function (data) {
+    d3.json("./world.json", function (data) {
 
         var oldScala = projection.scale();
         var oldTranslate = projection.translate();
